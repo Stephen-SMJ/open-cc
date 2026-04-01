@@ -62,6 +62,23 @@ npm link
 
 安装完成后，在终端的任何位置都可以直接输入 `open-cc` 启动。
 
+### 卸载
+
+如果通过一行命令脚本安装，执行以下命令卸载：
+
+```bash
+rm -rf ~/.open-cc
+rm -f ~/.local/bin/open-cc
+```
+
+如果使用了 `npm link`，先 unlink 再删除：
+
+```bash
+cd open-cc
+npm unlink -g
+rm -rf open-cc
+```
+
 ---
 
 ## 🔧 配置

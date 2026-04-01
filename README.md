@@ -62,6 +62,23 @@ npm link
 
 Now `open-cc` is available globally in your terminal.
 
+### Uninstall
+
+If you installed via the one-line script, remove it with:
+
+```bash
+rm -rf ~/.open-cc
+rm -f ~/.local/bin/open-cc
+```
+
+If you used `npm link`, unlink first:
+
+```bash
+cd open-cc
+npm unlink -g
+rm -rf open-cc
+```
+
 ---
 
 ## 🔧 Configuration
