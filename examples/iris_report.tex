@@ -1,0 +1,108 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\title{Iris Dataset Analysis Report}
+\author{Open-CC Example}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This report presents a compact exploratory and predictive analysis of the classic Iris dataset from scikit-learn.
+The dataset contains \textbf{150} observations, \textbf{4} numeric botanical features, and \textbf{3} balanced species classes:
+\emph{setosa}, \emph{versicolor}, and \emph{virginica} (50 samples each).
+
+\section{Methodology}
+\begin{itemize}
+    \item Data source: \texttt{sklearn.datasets.load\_iris(as\_frame=True)}.
+    \item Exploratory analysis: descriptive statistics, species-level means, and Pearson correlation matrix.
+    \item Predictive baseline: train/test split (80/20, stratified, random\_state=42), then
+    \texttt{StandardScaler + LogisticRegression(max\_iter=1000)} in a pipeline.
+    \item Evaluation: accuracy, macro F1, weighted F1, and confusion matrix.
+\end{itemize}
+
+\section{Exploratory Findings}
+\subsection{Overall Feature Summary}
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Statistic & Sepal Length & Sepal Width & Petal Length & Petal Width \\
+\midrule
+Mean & 5.843 & 3.057 & 3.758 & 1.199 \\
+Std & 0.828 & 0.436 & 1.765 & 0.762 \\
+Min & 4.300 & 2.000 & 1.000 & 0.100 \\
+Median & 5.800 & 3.000 & 4.350 & 1.300 \\
+Max & 7.900 & 4.400 & 6.900 & 2.500 \\
+\bottomrule
+\end{tabular}
+\caption{Overall descriptive statistics (selected rows).}
+\end{table}
+
+\subsection{Species-Level Means}
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Species & Sepal Length & Sepal Width & Petal Length & Petal Width \\
+\midrule
+setosa & 5.006 & 3.428 & 1.462 & 0.246 \\
+versicolor & 5.936 & 2.770 & 4.260 & 1.326 \\
+virginica & 6.588 & 2.974 & 5.552 & 2.026 \\
+\bottomrule
+\end{tabular}
+\caption{Per-species mean feature values.}
+\end{table}
+
+The species means indicate a strong separation in petal dimensions:
+\emph{setosa} has much smaller petals, while \emph{virginica} has the largest.
+
+\subsection{Correlation Structure}
+Notable Pearson correlations include:
+\begin{itemize}
+    \item Petal length vs petal width: \textbf{0.963} (very strong positive).
+    \item Sepal length vs petal length: \textbf{0.872} (strong positive).
+    \item Sepal width has moderate negative relationships with petal measures (e.g., $-0.428$ with petal length).
+\end{itemize}
+
+\section{Classification Results}
+The logistic regression baseline achieved:
+\begin{itemize}
+    \item Accuracy: \textbf{0.9333}
+    \item Macro F1: \textbf{0.9333}
+    \item Weighted F1: \textbf{0.9333}
+\end{itemize}
+
+Confusion matrix (rows = true, columns = predicted; class order: setosa, versicolor, virginica):
+\[
+\begin{bmatrix}
+10 & 0 & 0 \\
+0 & 9 & 1 \\
+0 & 1 & 9
+\end{bmatrix}
+\]
+
+Interpretation: \emph{setosa} is perfectly classified in this split; misclassifications occur only between
+\emph{versicolor} and \emph{virginica}, which is expected given their closer feature overlap.
+
+\section{Conclusion}
+The Iris dataset shows clear class structure, especially in petal-related features.
+A simple standardized logistic regression model already provides strong performance ($\approx 93.3\%$ accuracy)
+on a held-out test split, making this a useful baseline for educational workflows in exploratory analysis
+and multiclass classification.
+
+\section*{Reproducibility}
+Generated artifacts are saved under \texttt{examples/}:
+\begin{itemize}
+    \item \texttt{iris\_analysis.py}
+    \item \texttt{iris\_results.json}
+    \item \texttt{iris\_overall\_summary.csv}
+    \item \texttt{iris\_species\_means.csv}
+    \item \texttt{iris\_correlation.csv}
+\end{itemize}
+
+\end{document}
