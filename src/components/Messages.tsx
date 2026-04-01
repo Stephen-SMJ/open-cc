@@ -25,7 +25,7 @@ export function Messages({ messages }: Props) {
         if (m.role === 'assistant') {
           return (
             <Box key={i} flexDirection="column" marginBottom={1}>
-              <Text bold color="green">Assistant</Text>
+              <Text bold color="green">open-cc</Text>
               <Text>{m.content}</Text>
             </Box>
           );

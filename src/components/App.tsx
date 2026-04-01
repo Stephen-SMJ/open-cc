@@ -163,7 +163,7 @@ export function App({
 
   return (
     <Box flexDirection="column" height="100%">
-      {messages.length === 0 && !printMode && <Logo />}
+      {!printMode && <Logo />}
 
       <Box flexDirection="column" flexGrow={1}>
         <Messages messages={messages} />

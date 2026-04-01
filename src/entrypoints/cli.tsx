@@ -155,7 +155,8 @@ async function main() {
           onMessagesChange={(msgs) => {
             currentMessages = msgs;
           }}
-        />
+        />,
+        { exitOnCtrlC: false },
       );
     });
 

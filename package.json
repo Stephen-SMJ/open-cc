@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "chmod +x dist/entrypoints/cli.js",
     "dev": "tsx src/entrypoints/cli.tsx",
     "test": "vitest run",
     "test:watch": "vitest"
