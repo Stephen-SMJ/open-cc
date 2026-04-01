@@ -34,17 +34,28 @@
 - [Node.js](https://nodejs.org/) >= 18
 - 一个 OpenAI 兼容的 API Key
 
-### 全局安装
+### 一行命令安装（推荐）
 
 ```bash
-# 克隆仓库
+curl -fsSL https://raw.githubusercontent.com/Stephen-SMJ/open-cc/main/install.sh | bash
+```
+
+自动克隆到 `~/.open-cc`，安装依赖，构建项目，并在 `~/.local/bin` 创建启动器。无需 `sudo`。
+
+**自定义选项**（在命令前设置环境变量）：
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `OPEN_CC_INSTALL_DIR` | `~/.open-cc` | 仓库克隆位置 |
+| `OPEN_CC_BIN_DIR` | `~/.local/bin` | `open-cc` 启动器位置 |
+| `OPEN_CC_BRANCH` | `main` | 要安装的 Git 分支 |
+
+### 手动从源码安装
+
+```bash
 git clone https://github.com/Stephen-SMJ/open-cc.git
 cd open-cc
-
-# 安装依赖
 npm install
-
-# 构建并链接到全局
 npm run build
 npm link
 ```

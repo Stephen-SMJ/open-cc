@@ -34,17 +34,28 @@
 - [Node.js](https://nodejs.org/) >= 18
 - An OpenAI-compatible API key
 
-### Install globally via npm
+### One-line install (recommended)
 
 ```bash
-# Clone the repository
+curl -fsSL https://raw.githubusercontent.com/Stephen-SMJ/open-cc/main/install.sh | bash
+```
+
+Clones to `~/.open-cc`, installs dependencies, builds the project, and places a launcher in `~/.local/bin`. No `sudo` required.
+
+**Options** (set as env vars before the command):
+
+| Variable | Default | Description |
+|---|---|---|
+| `OPEN_CC_INSTALL_DIR` | `~/.open-cc` | Where to clone the repo |
+| `OPEN_CC_BIN_DIR` | `~/.local/bin` | Where to put the `open-cc` launcher |
+| `OPEN_CC_BRANCH` | `main` | Git branch to install |
+
+### Manual install from source
+
+```bash
 git clone https://github.com/Stephen-SMJ/open-cc.git
 cd open-cc
-
-# Install dependencies
 npm install
-
-# Build & link globally
 npm run build
 npm link
 ```
