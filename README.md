@@ -1,6 +1,7 @@
 <div align="center">
 
 # open-cc
+<img width="1088" height="410" alt="image" src="https://github.com/user-attachments/assets/3a10f96c-a589-4d78-8902-cc23395b3336" />
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
@@ -17,6 +18,7 @@
 ---
 
 ## ✨ Features
+
 
 - **Interactive TUI** — Built with [Ink](https://github.com/vadimdemedes/ink) and React, providing a smooth terminal chat experience
 - **Agentic Tool Loop** — The model autonomously decides when to read, search, edit, write, or run shell commands
