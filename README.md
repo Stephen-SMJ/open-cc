@@ -13,7 +13,8 @@
 
 [English](./README.md) | [中文](./README_CN.md)
 
-<img width="1088" height="410" alt="image" src="https://github.com/user-attachments/assets/3a10f96c-a589-4d78-8902-cc23395b3336" />
+<img width="952" height="322" alt="CleanShot 2026-04-02 at 15 03 58@2x" src="https://github.com/user-attachments/assets/2de7475b-c958-41cb-8fd7-375e733d4d95" />
+
 
 </div>
 
