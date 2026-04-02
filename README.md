@@ -1,7 +1,7 @@
 <div align="center">
+<img width="230" height="51" alt="image" src="https://github.com/user-attachments/assets/7a29dc81-69e0-4492-9a44-f9bb051b5e29" />
 
-# open-cc
-<img width="1088" height="410" alt="image" src="https://github.com/user-attachments/assets/3a10f96c-a589-4d78-8902-cc23395b3336" />
+
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
@@ -12,6 +12,8 @@
 *Inspired by Claude Code, built for everyone.*
 
 [English](./README.md) | [中文](./README_CN.md)
+
+<img width="1088" height="410" alt="image" src="https://github.com/user-attachments/assets/3a10f96c-a589-4d78-8902-cc23395b3336" />
 
 </div>
 
