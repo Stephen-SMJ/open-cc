@@ -1,6 +1,6 @@
 <div align="center">
 
-# open-cc
+<img width="230" height="51" alt="image" src="https://github.com/user-attachments/assets/7a29dc81-69e0-4492-9a44-f9bb051b5e29" />
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
@@ -11,6 +11,8 @@
 *灵感来自 Claude Code，为所有人打造。*
 
 [English](./README.md) | [中文](./README_CN.md)
+
+<img width="952" height="322" alt="CleanShot 2026-04-02 at 15 03 58@2x" src="https://github.com/user-attachments/assets/2de7475b-c958-41cb-8fd7-375e733d4d95" />
 
 </div>
 
@@ -90,23 +92,7 @@ rm -rf open-cc
 ```bash
 export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
 export OPENAI_BASE_URL="https://api.openai.com/v1"
-export OPEN_CC_MODEL="gpt-4o"
-```
-
-| 变量 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| `OPENAI_API_KEY` | ✅ | — | API 密钥 |
-| `OPENAI_BASE_URL` | ❌ | `https://api.openai.com/v1` | API 基础地址（代理/第三方平台可用） |
-| `OPEN_CC_MODEL` | ❌ | `gpt-4.1-mini` | 默认使用的模型 |
-
-### 命令行参数
-
-你也可以通过 CLI 参数临时指定配置：
-
-```bash
-open-cc \
-  --model gpt-4o \
-  -p "用 3 个要点总结这个代码库"
+export OPEN_CC_MODEL="gpt-5.3-codex"
 ```
 
 ---
