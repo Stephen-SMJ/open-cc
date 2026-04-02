@@ -95,23 +95,7 @@ Set these in your shell `~/.bashrc`, `~/.zshrc`, or before running `open-cc`:
 ```bash
 export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
 export OPENAI_BASE_URL="https://api.openai.com/v1"
-export OPEN_CC_MODEL="gpt-4o"
-```
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | ✅ | — | Your API key |
-| `OPENAI_BASE_URL` | ❌ | `https://api.openai.com/v1` | API base URL (useful for proxies) |
-| `OPEN_CC_MODEL` | ❌ | `gpt-4.1-mini` | Default model to use |
-
-### One-shot / Scripted Mode
-
-You can also pass credentials directly via CLI flags:
-
-```bash
-open-cc \
-  --model gpt-4o \
-  -p "summarize this codebase in 3 bullets"
+export OPEN_CC_MODEL="gpt-5.3-codex"
 ```
 
 ---
