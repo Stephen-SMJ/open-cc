@@ -6,15 +6,26 @@ import { App } from '../components/App.js';
 import { Engine } from '../engine/query.js';
 import { PermissionChecker } from '../permissions/checker.js';
 import { saveSession, loadSession } from '../session/storage.js';
+import { loadGuides } from '../guides/loader.js';
 import type { MessageItem } from '../components/Messages.js';
 
 const SYSTEM_PROMPT = `You are Open-CC, a helpful terminal AI coding assistant.
-You have access to tools: Read, Glob, Grep, Write, Edit, Bash.
-Read-only tools are auto-approved. Write/Bash require user confirmation.
+You have access to tools: Read, Glob, Grep, Write, Edit, Bash, TodoListCreate, TodoListUpdate.
+Read-only tools are auto-approved. Write/Bash require user confirmation, but YOU MUST NOT ask for permission in plain text. Invoke the tool directly; the system will pause and ask the user automatically.
 When editing files, prefer the Edit tool for small changes and Write for new files.
+For multi-step tasks, create a todo list using TodoListCreate first, then update progress with TodoListUpdate as you complete each step.
 Always think step by step before taking action.`;
 
 const DEFAULT_SESSION_ID = 'default';
+
+function getGuides(options: any, cwd: string) {
+  const guideNames: string[] = Array.isArray(options.guide) ? options.guide : options.guide ? [options.guide] : [];
+  return loadGuides(cwd, guideNames.length ? guideNames : undefined);
+}
+
+function collectGuide(val: string, prev: string[]) {
+  return [...(prev || []), val];
+}
 
 function getModel(): string {
   return process.env.OPEN_CC_MODEL || 'gpt-4.1-mini';
@@ -33,12 +44,14 @@ async function runPrintMode(prompt: string, options: any) {
     }
   }
 
+  const guides = getGuides(options, cwd);
   const engine = new Engine({
     model: options.model || getModel(),
     systemPrompt: SYSTEM_PROMPT,
     maxTokens: options.maxTokens ? Number(options.maxTokens) : undefined,
     cwd,
     permissionChecker: checker,
+    guides,
   });
 
   if (initialMessages.length) {
@@ -46,7 +59,7 @@ async function runPrintMode(prompt: string, options: any) {
       initialMessages.map((m) => {
         if (m.role === 'user') return { role: 'user', content: m.content };
         if (m.role === 'assistant') return { role: 'assistant', content: m.content };
-        return { role: 'tool', tool_call_id: `legacy_${Math.random()}`, content: m.result };
+        return { role: 'tool', tool_call_id: (m as any).tool_call_id || `legacy_${Math.random()}`, content: m.result };
       }),
     );
   }
@@ -64,7 +77,7 @@ async function runPrintMode(prompt: string, options: any) {
       process.stdout.write(event.text);
       hasOutput = true;
     } else if (event.type === 'tool_result') {
-      currentMessages.push({ role: 'tool', toolName: event.toolName, result: event.result, isError: event.isError });
+      currentMessages.push({ role: 'tool', toolName: event.toolName, result: event.result, isError: event.isError, tool_call_id: event.toolCallId });
       if (options.verbose) {
         console.error(`\n[${event.toolName}] ${event.isError ? 'ERROR' : 'OK'}`);
       }
@@ -91,6 +104,7 @@ async function main() {
     .option('-p, --print', 'Print mode (non-interactive)', false)
     .option('--verbose', 'Verbose output in print mode', false)
     .option('--continue', 'Continue the previous session', false)
+    .option('--guide <name>', 'Load a guide context (can be used multiple times)', collectGuide, [])
     .argument('[prompt...]', 'Optional prompt')
     .action(async (promptParts: string[], options) => {
       const prompt = promptParts.join(' ').trim();

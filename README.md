@@ -28,6 +28,7 @@
 - **6 Built-in Tools** — `Read`, `Glob`, `Grep`, `Write`, `Edit`, `Bash`
 - **Permission System** — Read-only tools are auto-approved; write/bash commands require your confirmation
 - **Session Persistence** — Conversations are auto-saved. Use `--continue` to resume where you left off
+- **Todo List for Multi-step Tasks** — The model can create and update a task list so you can track progress visually
 - **OpenAI-Compatible API** — Works with OpenAI, Azure, OpenRouter, and any OpenAI-compatible endpoint
 - **Non-Interactive Mode** — Use `-p` for one-shot prompts or piping in scripts
 
@@ -98,6 +99,27 @@ export OPENAI_BASE_URL="https://api.openai.com/v1"
 export OPEN_CC_MODEL="gpt-5.3-codex"
 ```
 
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENAI_API_KEY` | ✅* | — | Your API key |
+| `ANTHROPIC_API_KEY` | ✅* | — | Fallback if `OPENAI_API_KEY` is not set |
+| `OPENAI_BASE_URL` | ❌ | `https://api.openai.com/v1` | API base URL (useful for proxies) |
+| `OPEN_CC_MODEL` | ❌ | `gpt-4.1-mini` | Default model to use |
+
+> *One of `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` must be provided.
+>
+> ⚠️ **Disclaimer on using `ANTHROPIC_API_KEY`**: Anthropic's API keys are intended for use with Anthropic's own services. Using an Anthropic API key with third-party or proxy endpoints may violate their Terms of Service and could lead to account suspension or termination. Use at your own risk.
+
+### One-shot / Scripted Mode
+
+You can also pass credentials directly via CLI flags:
+
+```bash
+open-cc \
+  --model gpt-5.3-codex \
+  -p "summarize this codebase in 3 bullets"
+```
+
 ---
 
 ## 🚀 Usage
@@ -133,6 +155,59 @@ open-cc --auto-approve
 ```
 
 > ⚠️ Use with caution. This skips confirmation dialogs for all tools.
+
+### Guides (Custom Context / Skills)
+
+`open-cc` supports loading custom **guides** — markdown context files that get injected into the system prompt. This is useful for enforcing coding styles, project conventions, or specialized workflows.
+
+#### Create a guide
+
+Create a directory under `~/.open-cc/guides/` (global) or `./.open-cc/guides/` (project-local) and place a `GUIDE.md` file inside:
+
+```bash
+mkdir -p ~/.open-cc/guides/rust
+
+cat <<'EOF' > ~/.open-cc/guides/rust/GUIDE.md
+When writing Rust code:
+- Prefer `Result<T, E>` over panics.
+- Always run `cargo clippy` after a build step.
+- Use `match` instead of `unwrap()` when possible.
+EOF
+```
+
+#### Use guides
+
+Load **all** available guides automatically:
+
+```bash
+open-cc
+```
+
+Load **specific** guides only:
+
+```bash
+open-cc --guide rust
+open-cc --guide rust --guide tests
+```
+
+Project-local guides take precedence over global guides with the same name.
+
+### Todo List (Multi-step Task Tracking)
+
+For complex requests, `open-cc` can create a todo list and update items as it works. You’ll see a live task panel above the conversation.
+
+```bash
+open-cc
+# then ask: "refactor src/engine/query.ts into smaller modules"
+```
+
+The model will call `TodoListCreate` to plan steps, then `TodoListUpdate` to mark them `done` as it progresses.
+
+> **Tip**: `TodoListCreate` and `TodoListUpdate` are auto-approved because they only affect in-memory state.
+
+### Working Indicator
+
+When `open-cc` is thinking, running tools, or waiting for permissions, you’ll see `⠋ open-cc is working…` below the last message. Press `Ctrl+C` at any time to cancel the current turn.
 
 ---
 

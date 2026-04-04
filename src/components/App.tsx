@@ -8,11 +8,14 @@ import type { AnyTool } from '../tools/base.js';
 import { Messages, type MessageItem } from './Messages.js';
 import { PermissionDialog } from './PermissionDialog.js';
 import { Logo } from './Logo.js';
+import type { Guide } from '../guides/types.js';
+import { TodoStore } from '../todos/store.js';
 
 const SYSTEM_PROMPT = `You are Open-CC, a helpful terminal AI coding assistant.
-You have access to tools: Read, Glob, Grep, Write, Edit, Bash.
-Read-only tools are auto-approved. Write/Bash require user confirmation.
+You have access to tools: Read, Glob, Grep, Write, Edit, Bash, TodoListCreate, TodoListUpdate.
+Read-only tools are auto-approved. Write/Bash require user confirmation, but YOU MUST NOT ask for permission in plain text. Invoke the tool directly; the system will pause and ask the user automatically.
 When editing files, prefer the Edit tool for small changes and Write for new files.
+For multi-step tasks, create a todo list using TodoListCreate first, then update progress with TodoListUpdate as you complete each step.
 Always think step by step before taking action.`;
 
 export type AppProps = {
@@ -24,6 +27,7 @@ export type AppProps = {
   printMode?: boolean;
   initialMessages?: MessageItem[];
   onMessagesChange?: (messages: MessageItem[]) => void;
+  guides?: Guide[];
 };
 
 export function App({
@@ -35,20 +39,23 @@ export function App({
   printMode,
   initialMessages = [],
   onMessagesChange,
+  guides = [],
 }: AppProps) {
   const { exit } = useApp();
   const [messages, setMessages] = useState<MessageItem[]>(initialMessages);
   const [inputValue, setInputValue] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
   const [permissionRequest, setPermissionRequest] = useState<{
     tool: AnyTool;
     input: unknown;
     resolve: (answer: boolean) => void;
   } | null>(null);
+  const [todos, setTodos] = useState<TodoStore['getItems'] extends () => infer R ? R : never>([]);
 
   const engineRef = useRef<Engine | null>(null);
   const permissionCheckerRef = useRef<PermissionChecker>(new PermissionChecker());
   const messagesRef = useRef<MessageItem[]>(messages);
+  const todoStoreRef = useRef<TodoStore>(new TodoStore());
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -66,6 +73,8 @@ export function App({
       maxTokens,
       cwd,
       permissionChecker: permissionCheckerRef.current,
+      guides,
+      todoStore: todoStoreRef.current,
       onPermissionRequest: async (tool, input) => {
         if (printMode) return false;
         return new Promise((resolve) => {
@@ -78,11 +87,11 @@ export function App({
         initialMessages.map((m) => {
           if (m.role === 'user') return { role: 'user', content: m.content };
           if (m.role === 'assistant') return { role: 'assistant', content: m.content };
-          return { role: 'tool', tool_call_id: `legacy_${Math.random()}`, content: m.result };
+          return { role: 'tool', tool_call_id: (m as any).tool_call_id || `legacy_${Math.random()}`, content: m.result };
         }),
       );
     }
-  }, [model, maxTokens, cwd, printMode, initialMessages]);
+  }, [model, maxTokens, cwd, printMode, initialMessages, guides]);
 
   useInput((inputChar, key) => {
     if (key.ctrl && inputChar === 'd') {
@@ -90,7 +99,7 @@ export function App({
       exit();
     }
     if (key.ctrl && inputChar === 'c') {
-      if (isThinking) {
+      if (isWorking) {
         engineRef.current?.abort();
       } else {
         setInputValue('');
@@ -111,7 +120,7 @@ export function App({
     if (!engineRef.current || !text.trim()) return;
     setMessages((prev) => [...prev, { role: 'user', content: text }]);
     setInputValue('');
-    setIsThinking(true);
+    setIsWorking(true);
 
     let assistantBuffer = '';
     let currentAssistantAdded = false;
@@ -132,18 +141,28 @@ export function App({
           return next;
         });
       } else if (event.type === 'tool_result') {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'tool', toolName: event.toolName, result: event.result, isError: event.isError },
-        ]);
+        setMessages((prev) => {
+          if (!currentAssistantAdded) {
+            // Model called tools without emitting text first; inject empty assistant message
+            return [
+              ...prev,
+              { role: 'assistant', content: '' },
+              { role: 'tool', toolName: event.toolName, result: event.result, isError: event.isError, tool_call_id: event.toolCallId },
+            ];
+          }
+          return [
+            ...prev,
+            { role: 'tool', toolName: event.toolName, result: event.result, isError: event.isError, tool_call_id: event.toolCallId },
+          ];
+        });
         currentAssistantAdded = false;
         assistantBuffer = '';
-      } else if (event.type === 'waiting') {
-        setIsThinking(false);
+      } else if (event.type === 'todos_changed') {
+        setTodos([...todoStoreRef.current.getItems()]);
       }
     }
 
-    setIsThinking(false);
+    setIsWorking(false);
   }, []);
 
   // Handle initial input for print mode or direct prompt
@@ -166,23 +185,23 @@ export function App({
       {!printMode && <Logo />}
 
       <Box flexDirection="column" flexGrow={1}>
-        <Messages messages={messages} />
+        <Messages messages={messages} todos={todos} />
       </Box>
 
       {permissionRequest && (
         <PermissionDialog tool={permissionRequest.tool} input={permissionRequest.input} onAnswer={handleAnswer} />
       )}
 
-      {isThinking && !permissionRequest && (
+      {isWorking && !permissionRequest && (
         <Box marginY={1}>
           <Text color="green">
             <Spinner type="dots" />
           </Text>
-          <Text> Thinking…</Text>
+          <Text> open-cc is working…</Text>
         </Box>
       )}
 
-      {!isThinking && !permissionRequest && !printMode && (
+      {!isWorking && !permissionRequest && !printMode && (
         <Box flexDirection="column">
           <Box borderStyle="round" borderColor="cyan" paddingX={1}>
             <Box>

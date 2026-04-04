@@ -25,6 +25,7 @@
 - **6 个内置工具** — `Read`（读）、`Glob`（查找）、`Grep`（搜索）、`Write`（写）、`Edit`（改）、`Bash`（命令）
 - **权限系统** — 只读工具自动放行，写操作 / Bash 命令需要用户确认
 - **会话持久化** — 自动保存对话记录，使用 `--continue` 即可恢复上下文继续聊
+- **多步任务追踪（Todo List）** — 复杂任务自动拆解为子任务列表，可视化跟踪进度
 - **兼容 OpenAI 接口** — 支持 OpenAI、Azure、OpenRouter 及所有 OpenAI 兼容端点
 - **非交互模式** — 使用 `-p` 参数进行一次性问答，方便脚本和管道调用
 
@@ -95,6 +96,27 @@ export OPENAI_BASE_URL="https://api.openai.com/v1"
 export OPEN_CC_MODEL="gpt-5.3-codex"
 ```
 
+| 变量 | 必填 | 默认值 | 说明 |
+|------|------|--------|------|
+| `OPENAI_API_KEY` | ✅* | — | API 密钥 |
+| `ANTHROPIC_API_KEY` | ✅* | — | 当 `OPENAI_API_KEY` 未设置时的回退选项 |
+| `OPENAI_BASE_URL` | ❌ | `https://api.openai.com/v1` | API 基础地址（代理/第三方平台可用） |
+| `OPEN_CC_MODEL` | ❌ | `gpt-4.1-mini` | 默认使用的模型 |
+
+> *`OPENAI_API_KEY` 和 `ANTHROPIC_API_KEY` 至少设置一个即可。
+>
+> ⚠️ **关于 `ANTHROPIC_API_KEY` 的声明**：Anthropic 的 API Key 仅授权用于 Anthropic 官方服务。将其用于第三方或代理端点可能违反其服务条款，并可能导致账号被封禁。请自行承担使用风险。
+
+### 命令行参数
+
+你也可以通过 CLI 参数临时指定配置：
+
+```bash
+open-cc \
+  --model gpt-5.3-codex \
+  -p "用 3 个要点总结这个代码库"
+```
+
 ---
 
 ## 🚀 使用方式
@@ -130,6 +152,59 @@ open-cc --auto-approve
 ```
 
 > ⚠️ 谨慎使用。此模式会跳过所有工具确认弹窗。
+
+### Guides（自定义上下文 / Skills）
+
+`open-cc` 支持加载自定义 **guides** —— 即会被注入到 system prompt 中的 Markdown 上下文文件。这非常适合用来统一代码风格、项目规范或特定的工作流程。
+
+#### 创建 guide
+
+在 `~/.open-cc/guides/`（全局）或 `./.open-cc/guides/`（项目本地）下新建目录，并在目录中放置 `GUIDE.md`：
+
+```bash
+mkdir -p ~/.open-cc/guides/rust
+
+cat <<'EOF' > ~/.open-cc/guides/rust/GUIDE.md
+写 Rust 代码时请遵守以下规范：
+- 优先使用 `Result<T, E>`，避免 panic。
+- 每次构建后运行 `cargo clippy`。
+- 尽量用 `match` 而不是 `unwrap()`。
+EOF
+```
+
+#### 使用 guides
+
+自动加载**所有**可用的 guides：
+
+```bash
+open-cc
+```
+
+只加载**指定**的 guides：
+
+```bash
+open-cc --guide rust
+open-cc --guide rust --guide tests
+```
+
+同名的项目本地 guide 会覆盖全局 guide。
+
+### Todo List（多步任务追踪）
+
+遇到复杂请求时，`open-cc` 可以创建 todo 列表并在执行过程中更新进度，你会在对话上方看到一个实时任务面板。
+
+```bash
+open-cc
+# 然后提问："把 src/engine/query.ts 拆成更小的模块"
+```
+
+模型会自动调用 `TodoListCreate` 规划步骤，随后通过 `TodoListUpdate` 逐项标记完成。
+
+> **提示**：`TodoListCreate` 和 `TodoListUpdate` 属于纯内存操作，已设置为自动放行，无需手动确认。
+
+### 工作状态指示
+
+当 `open-cc` 正在思考、执行工具或等待权限时，你会在消息下方看到 `⠋ open-cc is working…`。按 `Ctrl+C` 可随时取消当前回合。
 
 ---
 
